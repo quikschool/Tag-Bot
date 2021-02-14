@@ -12,7 +12,8 @@ module.exports = {
     description: 'This is a command you can use to get any tag from the bot including tags made by other people',
     callback: async (message, arguments, text, client) => {
         const target = arguments[0];
-        const tagArgs = await tag.readTag(target);
+        const guildId = message.guild.id;
+        const tagArgs = await tag.readTag(target, guildId);
         if (tagArgs === null) {
             message.channel.send("This tag doesn't exist =0");
             return;
@@ -56,5 +57,6 @@ module.exports = {
 
         console.log(target);
         console.log(tagInfo);
+        console.log(user);
     }
 }

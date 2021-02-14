@@ -1,15 +1,12 @@
-const { Message } = require('discord.js');
 const mongo = require('./mongo');
-const { findOne } = require('./schemas/tag-schema');
 const tagSchema = require('./schemas/tag-schema');
-const Discord = require('discord.js');
 
 const tagsCache = {}
 
 module.exports = (client) => {};
 
-module.exports.readTag = async (readName) => {
-    const cachedTag = tagsCache[`${readName}`]
+module.exports.readTag = async (readName, readGuild) => {
+    const cachedTag = tagsCache[`${readName}-${readGuild}`]
     if (cachedTag) {
         return cachedTag;
     }
@@ -19,7 +16,8 @@ module.exports.readTag = async (readName) => {
             console.log('Running findOne()');
 
             const result = await tagSchema.findOne({
-                tagName: readName
+                tagName: readName,
+                GuildId: readGuild
             }, function (err, docs) {
                 if (err) {
                     console.log(err);
@@ -41,21 +39,21 @@ module.exports.readTag = async (readName) => {
             const tag = result.tag
             const info = result.tagInfo
             const author = result.tagAuthor
-            tagsCache[`${readName}`] = [tag, info, author];
+            tagsCache[`${readName}-${readGuild}`] = [tag, info, author];
 
-            return tagsCache[`${readName}`];
+            return tagsCache[`${readName}-${readGuild}`];
         } finally {
             mongoose.connection.close();
         }
     });
 }
 
-module.exports.addTag = async (addName, addContent, addInfo, addAuthor) => {
+module.exports.addTag = async (addName, addContent, addInfo, addAuthor, addGuild) => {
     return await mongo().then(async (mongoose) => {
         try {
             const existing = await tagSchema.findOne({
                 tagName: addName,
-                tagAuthor: addAuthor
+                GuildId: addGuild
             });
             if (existing) {
                 return null;
@@ -65,14 +63,16 @@ module.exports.addTag = async (addName, addContent, addInfo, addAuthor) => {
                 newTag = await new tagSchema({
                     tagName: addName,
                     tag: addContent,
-                    tagAuthor: addAuthor
+                    tagAuthor: addAuthor,
+                    GuildId: addGuild
                 }).save();
             } else {
                 newTag = await new tagSchema({
                     tagName: addName,
                     tag: addContent,
                     tagInfo: addInfo,
-                    tagAuthor: addAuthor
+                    tagAuthor: addAuthor,
+                    GuildId: addGuild
                 }).save();
             }
 
@@ -84,7 +84,7 @@ module.exports.addTag = async (addName, addContent, addInfo, addAuthor) => {
                 return "fail";
             }
 
-            tagsCache[`${addName}`] = [addContent, addInfo, addAuthor];
+            tagsCache[`${addName}-${addGuild}`] = [addContent, addInfo, addAuthor];
 
             return addStatus
         } finally {
@@ -93,12 +93,13 @@ module.exports.addTag = async (addName, addContent, addInfo, addAuthor) => {
     });
 }
 
-module.exports.deleteTag = async (deleteName, messageAuthor) => {
+module.exports.deleteTag = async (deleteName, messageAuthor, tagGuild) => {
     return await mongo().then(async (mongoose) => {
         try {
             const deleteResult = await tagSchema.findOne({
                 tagName: deleteName,
-                tagAuthor: messageAuthor
+                tagAuthor: messageAuthor,
+                GuildId: tagGuild
             },
             function (err, docs) {
                 if (err) {
@@ -118,7 +119,8 @@ module.exports.deleteTag = async (deleteName, messageAuthor) => {
                 console.log('success!');
                 await tagSchema.findOneAndDelete({
                     tagName: deleteName,
-                    tagAuthor: messageAuthor
+                    tagAuthor: messageAuthor,
+                    GuildId: tagGuild
                 }, function (err, docs) {
                     if (err) {
                         console.log(err);
@@ -126,7 +128,7 @@ module.exports.deleteTag = async (deleteName, messageAuthor) => {
                         console.log(`Deleted document: ${docs}`);
                     }
                 });
-                tagsCache[`${deleteName}`] = null;
+                tagsCache[`${deleteName}-${tagGuild}`] = null;
             } else {
                 status = "fail";
             }

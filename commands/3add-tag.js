@@ -12,6 +12,7 @@ module.exports = {
     const tagContent = arguments[1];
     var tagInfo = null;
     
+    
     if (arguments.length > 2) {
       const remaining = arguments;
       

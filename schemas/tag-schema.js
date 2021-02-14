@@ -9,7 +9,8 @@ const tagSchema = mongoose.Schema({
     tagName: reqString,
     tag: reqString,
     tagInfo: String,
-    tagAuthor: reqString
+    tagAuthor: reqString,
+    guildId: reqString
 })
 
 module.exports = mongoose.model('tags', tagSchema);

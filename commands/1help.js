@@ -1,11 +1,14 @@
 const loadCommands = require('./load-commands');
 const { prefix } = require('../config.json');
+const Discord = require('discord.js');
 
 module.exports = {
     commands: ['help'],
     description: 'A very helpful command to help you use this bot',
     callback: (message) => {
         let reply = 'Why hello there! Here are my commands: \n\n\n ';
+
+        let helpText = '';
 
         const commands = loadCommands();
 
@@ -37,9 +40,19 @@ module.exports = {
             const args = command.expectedArgs ? ` ${command.expectedArgs}` : '';
             const { description } = command;
 
-            reply += `**${prefix}${mainCommand}${args}**: \n${description}\n\n`;
+            helpText += `**${prefix}${mainCommand}${args}**: \n${description}\n\n`;
         }
 
-        message.channel.send(reply);
+        embed = new Discord.MessageEmbed()
+            .setTitle(reply)
+            .setColor('#FF0000')
+            .addFields(
+                {
+                    name: 'Commands: ',
+                    value: helpText
+                }
+            );
+
+        message.channel.send(embed);
     }
 }
