@@ -17,7 +17,7 @@ module.exports.readTag = async (readName, readGuild) => {
 
             const result = await tagSchema.findOne({
                 tagName: readName,
-                GuildId: readGuild
+                guildId: readGuild
             }, function (err, docs) {
                 if (err) {
                     console.log(err);
@@ -53,7 +53,7 @@ module.exports.addTag = async (addName, addContent, addInfo, addAuthor, addGuild
         try {
             const existing = await tagSchema.findOne({
                 tagName: addName,
-                GuildId: addGuild
+                guildId: addGuild
             });
             if (existing) {
                 return null;
@@ -64,7 +64,7 @@ module.exports.addTag = async (addName, addContent, addInfo, addAuthor, addGuild
                     tagName: addName,
                     tag: addContent,
                     tagAuthor: addAuthor,
-                    GuildId: addGuild
+                    guildId: addGuild
                 }).save();
             } else {
                 newTag = await new tagSchema({
@@ -72,7 +72,7 @@ module.exports.addTag = async (addName, addContent, addInfo, addAuthor, addGuild
                     tag: addContent,
                     tagInfo: addInfo,
                     tagAuthor: addAuthor,
-                    GuildId: addGuild
+                    guildId: addGuild
                 }).save();
             }
 
@@ -99,7 +99,7 @@ module.exports.deleteTag = async (deleteName, messageAuthor, tagGuild) => {
             const deleteResult = await tagSchema.findOne({
                 tagName: deleteName,
                 tagAuthor: messageAuthor,
-                GuildId: tagGuild
+                guildId: tagGuild
             },
             function (err, docs) {
                 if (err) {
@@ -120,7 +120,7 @@ module.exports.deleteTag = async (deleteName, messageAuthor, tagGuild) => {
                 await tagSchema.findOneAndDelete({
                     tagName: deleteName,
                     tagAuthor: messageAuthor,
-                    GuildId: tagGuild
+                    guildId: tagGuild
                 }, function (err, docs) {
                     if (err) {
                         console.log(err);
@@ -134,6 +134,22 @@ module.exports.deleteTag = async (deleteName, messageAuthor, tagGuild) => {
             }
 
             return status;
+        } finally {
+            mongoose.connection.close();
+        }
+    });
+}
+
+module.exports.tagsList = async (guild) => {
+    return await mongo().then(async (mongoose) => {
+        try {
+            const listResult = await tagSchema.find({ guildId:guild }, {
+                _id:0,
+                tagAuthor:0,
+                __v:0
+            });
+            console.log(listResult);
+            return listResult
         } finally {
             mongoose.connection.close();
         }

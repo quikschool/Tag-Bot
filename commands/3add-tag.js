@@ -12,7 +12,6 @@ module.exports = {
     const tagContent = arguments[1];
     var tagInfo = null;
     
-    
     if (arguments.length > 2) {
       const remaining = arguments;
       
@@ -25,9 +24,12 @@ module.exports = {
       var tagInfo = null;
     }
 
-    const addedTag = await tag.addTag(tagName, tagContent, tagInfo, message.author.id);
+    const addedTag = await tag.addTag(tagName, tagContent, tagInfo, message.author.id, message.guild.id);
 
-    if (!addedTag === "success") {
+    if (addedTag === null) {
+      message.reply('there already exists a tag by this name in this server');
+      return;
+    } else if (addedTag === "fail") {
       message.reply('An error has occured while adding the tag; please report this to the developers.');
       return;
     }

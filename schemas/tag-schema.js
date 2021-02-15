@@ -13,4 +13,4 @@ const tagSchema = mongoose.Schema({
     guildId: reqString
 })
 
-module.exports = mongoose.model('tags', tagSchema);
+module.exports = mongoose.model('tagSchema', tagSchema);

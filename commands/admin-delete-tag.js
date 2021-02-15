@@ -10,8 +10,8 @@ module.exports = {
     description: 'This a command which can be used only by moderators to moderate and delete tags',
     callback: async (message, arguments) => {
         const tagName = arguments[0];
-        const author = message.mentions.users.first();
-        const deleteStatus = await tag.deleteTag(tagName, author.id);
+        const author = message.mentions.users.last();
+        const deleteStatus = await tag.deleteTag(tagName, author.id, message.guild.id);
         if (deleteStatus === "fail") {
             message.reply("An error has occured! If you're sure this tag exists, please report this to the developers");
             return;

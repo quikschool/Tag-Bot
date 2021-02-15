@@ -1,4 +1,4 @@
-const tag = require('../tag');
+const tags = require('../tag');
 const Discord = require('discord.js');
 
 module.exports = {
@@ -11,13 +11,15 @@ module.exports = {
     requiredRoles: [],
     description: 'This is a command you can use to get any tag from the bot including tags made by other people',
     callback: async (message, arguments, text, client) => {
-        const target = arguments[0];
+        var target = arguments[0];
         const guildId = message.guild.id;
-        const tagArgs = await tag.readTag(target, guildId);
+        var tagArgs = await tags.readTag(target, guildId);
         if (tagArgs === null) {
             message.channel.send("This tag doesn't exist =0");
             return;
         };
+
+        console.log(target);
 
         const tagContent = tagArgs[0];
         const tagInfo = tagArgs[1];
